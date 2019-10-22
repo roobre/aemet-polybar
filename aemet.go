@@ -63,7 +63,7 @@ func (l *Location) NextHours(n int) []ParsedForecast {
 
 	for i := 1; i <= n; i++ {
 		day := time.Now().Truncate(24 * time.Hour).Format(dateFormat)
-		hour := time.Now().Truncate(time.Hour).Add(time.Duration(i) * time.Hour)
+		hour := time.Now().Add(-15 * time.Minute).Truncate(time.Hour).Add(time.Duration(i) * time.Hour)
 
 		f := l.DailyForecasts[day]
 		forecasts = append(forecasts, ParsedForecast{
