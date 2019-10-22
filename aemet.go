@@ -61,7 +61,7 @@ type DailyForecast struct {
 func (l *Location) NextHours(n int) []ParsedForecast {
 	forecasts := make([]ParsedForecast, 0, n)
 
-	for i := 0; i <= n; i++ {
+	for i := 1; i <= n; i++ {
 		day := time.Now().Truncate(24 * time.Hour).Format(dateFormat)
 		hour := time.Now().Truncate(time.Hour).Add(time.Duration(i) * time.Hour)
 

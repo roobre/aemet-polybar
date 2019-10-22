@@ -30,7 +30,7 @@ func main() {
 	forecast.Parse()
 
 	out := ""
-	for _, f := range forecast.NextHours(1) {
+	for _, f := range forecast.NextHours(2) {
 		out += f.String() + "	 "
 	}
 
