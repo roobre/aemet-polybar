@@ -31,7 +31,7 @@ func main() {
 
 	out := ""
 	for _, f := range forecast.NextHours(2) {
-		out += f.String() + "	 "
+		out += f.String() + "  "
 	}
 
 	os.Stdout.WriteString(strings.TrimSpace(out))
