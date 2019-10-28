@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"flag"
+	"fmt"
 	"golang.org/x/text/encoding/charmap"
 	"io"
 	"log"
@@ -17,7 +18,11 @@ func main() {
 	hours := flag.Int("n", 2, "Number of hours in the future to output")
 	flag.Parse()
 
-	resp, _ := http.Get("https://www.aemet.es/xml/municipios_h/localidad_h_" + *city + ".xml")
+	resp, err := http.Get("https://www.aemet.es/xml/municipios_h/localidad_h_" + *city + ".xml")
+	if err != nil {
+		fmt.Println(" Network error") // https://fontawesome.com/icons/exclamation-triangle?style=solid
+	}
+
 	dec := xml.NewDecoder(resp.Body)
 	dec.CharsetReader = func(charset string, input io.Reader) (reader io.Reader, e error) {
 		if charset != "ISO-8859-15" {
@@ -27,8 +32,9 @@ func main() {
 	}
 
 	forecast := Location{}
-	err := dec.Decode(&forecast)
+	err = dec.Decode(&forecast)
 	if err != nil {
+		fmt.Println(" Parse error")
 		log.Fatal(err)
 	}
 
