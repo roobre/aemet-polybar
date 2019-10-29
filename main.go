@@ -25,10 +25,12 @@ func main() {
 
 	dec := xml.NewDecoder(resp.Body)
 	dec.CharsetReader = func(charset string, input io.Reader) (reader io.Reader, e error) {
-		if charset != "ISO-8859-15" {
+		switch charset {
+		case "ISO-8859-15":
+			return charmap.ISO8859_15.NewDecoder().Reader(input), nil
+		default:
 			return nil, errors.New("charset is not ISO-8859-15")
 		}
-		return charmap.ISO8859_15.NewDecoder().Reader(input), nil
 	}
 
 	forecast := Location{}
