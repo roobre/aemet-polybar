@@ -10,12 +10,15 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
+	"time"
 )
 
 func main() {
 	city := flag.String("location", "08019", "City code from aemet URL (https://www.aemet.es/xml/municipios_h/localidad_h_08019.xml)")
 	hours := flag.Int("n", 2, "Number of hours in the future to output")
+	labels := flag.String("labels", "", "List of hours and labels to show (e.g. \":13,19h:19\")")
 	flag.Parse()
 
 	resp, err := http.Get("https://www.aemet.es/xml/municipios_h/localidad_h_" + *city + ".xml")
@@ -44,8 +47,34 @@ func main() {
 	forecast.Parse()
 
 	out := ""
-	for _, f := range forecast.NextHours(*hours) {
-		out += f.String() + "  "
+
+	if *labels != "" {
+		for _, pair := range strings.Split(*labels, ",") {
+			labelHour := strings.Split(pair, ":")
+			if len(labelHour) != 2 {
+				continue
+			}
+
+			hour, err := strconv.Atoi(labelHour[1])
+			if err != nil {
+				continue
+			}
+
+			if time.Now().Hour() > hour {
+				continue
+			}
+
+			hourForecast := forecast.At(hour)
+			if hourForecast == nil {
+				continue
+			}
+
+			out += labelHour[0] + ": " + hourForecast.String() + "  "
+		}
+	} else {
+		for _, f := range forecast.NextHours(*hours) {
+			out += f.String() + "  "
+		}
 	}
 
 	os.Stdout.WriteString(strings.TrimSpace(out))

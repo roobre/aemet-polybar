@@ -84,6 +84,28 @@ func (l *Location) NextHours(n int) []ParsedForecast {
 	return forecasts
 }
 
+func (l *Location) At(hour int) *ParsedForecast {
+	day := time.Now().Truncate(24 * time.Hour).Format(dateFormat)
+	f := l.DailyForecasts[day]
+
+	if f == nil {
+		return nil
+	}
+
+	return &ParsedForecast{
+		Location: l.Name,
+		DateStr:  f.DateStr,
+		Hour:     hour,
+
+		SkyState:        f.HourlySkyState[hour],
+		Precipitation:   f.HourlyPrecipitation[hour],
+		POPPercent:      f.HourlyPOP[hour],
+		Temperature:     f.HourlyTemperature[hour],
+		ThermalFeel:     f.HourlyThermalFeel[hour],
+		HumidityPercent: f.HourlyHumidity[hour],
+	}
+}
+
 func (l *Location) Parse() {
 	l.DailyForecasts = map[string]*DailyForecast{}
 
