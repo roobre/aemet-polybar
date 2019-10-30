@@ -21,6 +21,7 @@ func main() {
 	resp, err := http.Get("https://www.aemet.es/xml/municipios_h/localidad_h_" + *city + ".xml")
 	if err != nil {
 		fmt.Println(" Network error") // https://fontawesome.com/icons/exclamation-triangle?style=solid
+		log.Fatal(err)
 	}
 
 	dec := xml.NewDecoder(resp.Body)
