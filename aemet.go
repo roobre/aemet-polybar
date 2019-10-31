@@ -34,8 +34,8 @@ type DailyForecast struct {
 	HourlyPrecipitation map[int]float32
 
 	POPs []struct {
-		Hour       int `xml:"periodo,attr"`
-		POPPercent int `xml:",chardata"`
+		Period     string `xml:"periodo,attr"`
+		POPPercent int    `xml:",chardata"`
 	} `xml:"prob_precipitacion" json:"-"`
 	HourlyPOP map[int]int
 
@@ -129,7 +129,21 @@ func (f *DailyForecast) Parse() {
 
 	f.HourlyPOP = make(map[int]int, len(f.POPs))
 	for _, pop := range f.POPs {
-		f.HourlyPOP[pop.Hour] = pop.POPPercent
+		if len(pop.Period) != 4 {
+			continue
+		}
+		begin, err := strconv.Atoi(pop.Period[:2])
+		if err != nil {
+			continue
+		}
+		end, err := strconv.Atoi(pop.Period[2:])
+		if err != nil {
+			continue
+		}
+
+		for i := begin; i <= end; i++ {
+			f.HourlyPOP[i] = pop.POPPercent
+		}
 	}
 
 	f.HourlyTemperature = make(map[int]int, len(f.Temperatures))
