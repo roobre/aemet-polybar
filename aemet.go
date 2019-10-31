@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -180,5 +181,16 @@ func (pf *ParsedForecast) String() string {
 	if feeldiff := pf.Temperature - pf.ThermalFeel; feeldiff != 0 {
 		fdstr = fmt.Sprintf("(%+d)", feeldiff)
 	}
-	return fmt.Sprintf("%s %d%s°C", statusFonts[strings.TrimSuffix(pf.SkyState, "n")], pf.Temperature, fdstr)
+
+	tempstr := ""
+	if pf.ThermalFeel <= 17 || pf.ThermalFeel >= 22 {
+		tempstr = fmt.Sprintf(" %d%s°C", pf.Temperature, fdstr)
+	}
+
+	popstr := ""
+	if pf.POPPercent > 10 {
+		popstr = fmt.Sprintf(" %d%%", pf.POPPercent)
+	}
+
+	return statusFonts[strings.TrimSuffix(pf.SkyState, "n")] + popstr + tempstr
 }
