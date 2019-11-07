@@ -25,17 +25,23 @@ For example:
 |`🏠:18`     |`🏠:  21°C`|
 |`9h:9,🏠:18`|`9h:  18°C  🏠:  21°C`|
 
-Icons and/or emoji are usually good labels, although any string can be used as a label, as long as it does not contain a colon (`:`). Time must be an integer representing the hour you want to see the forecast for. Multiple pairs of `label:time` must be separated with a comma (`,`).
+Icons and/or emoji are usually good labels, although any string can be used as `<LABEL>` as long as it does not contain a colon (`:`) or a comma(`,`). `<TIME>` must be an integer representing the hour you want to see the forecast for. Multiple pairs of `<LABEL>:<TIME>` must be separated with a comma (`,`).
 
 `aemet` will play smart and automatically hide forecasts for times that are in the past.
 
-In addition, `aemet` will also hide conditions that it will consider "normal". More precisely:
+## Output
+
+The full output format is:
+
+`{icon} ({POP}%) {temperature} (+{thermalfeel})`
+
+however, to avoid cluttering your bar with non-relevant information, `aemet` will hide values that it considers not remarkable. More precisely:
 
 * Probability of precipitation (POP) will only be show when it is greater than 10%
 * Thermal Feel will only be shown when it is different than the actual temperature
-* Temperature will only be shown when it is smaller or equal to 17 and greater or equal to 22 degrees celsius.
+* Temperature will only be shown when it is outside of the (17, 22) range.
 
-These defualts are heavily opinionated and are not configurable at the moment.
+Neither these defaults nor the output format are configurable at the moment. PRs implementing them using flags and `text/template` are welcome.
 
 ## Configuration
 
