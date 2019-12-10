@@ -184,7 +184,7 @@ func (pf *ParsedForecast) String() string {
 
 	tempstr := ""
 	if pf.ThermalFeel <= 17 || pf.ThermalFeel >= 22 {
-		tempstr = fmt.Sprintf(" %d%s°C", pf.Temperature, fdstr)
+		tempstr = fmt.Sprintf(" %d°C %s", pf.Temperature, fdstr)
 	}
 
 	popstr := ""
