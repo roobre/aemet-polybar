@@ -70,7 +70,10 @@ func main() {
 				continue
 			}
 
-			out += labelHour[0] + ": " + hourForecast.String() + *separator
+			if labelHour[0] != "" {
+				out += labelHour[0] + ": "
+			}
+			out += hourForecast.String() + *separator
 		}
 	} else {
 		for _, f := range forecast.NextHours(*hours) {
