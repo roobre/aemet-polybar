@@ -24,7 +24,7 @@ func main() {
 
 	resp, err := http.Get("https://www.aemet.es/xml/municipios_h/localidad_h_" + *city + ".xml")
 	if err != nil {
-		fmt.Println(" Network error") // https://fontawesome.com/icons/exclamation-triangle?style=solid
+		fmt.Println(" net") // https://fontawesome.com/icons/exclamation-triangle?style=solid
 		log.Fatal(err)
 	}
 
@@ -41,7 +41,7 @@ func main() {
 	forecast := Location{}
 	err = dec.Decode(&forecast)
 	if err != nil {
-		fmt.Println(" Parse error")
+		fmt.Println(" fmt")
 		log.Fatal(err)
 	}
 
