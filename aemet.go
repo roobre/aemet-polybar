@@ -184,7 +184,7 @@ func (pf *ParsedForecast) String() string {
 
 	tempstr := ""
 	if pf.ThermalFeel <= 17 || pf.ThermalFeel >= 22 {
-		tempstr = fmt.Sprintf(" %d°C %s", pf.Temperature, fdstr)
+		tempstr = strings.TrimSpace(fmt.Sprintf(" %d°C %s", pf.Temperature, fdstr))
 	}
 
 	popstr := ""
@@ -192,5 +192,5 @@ func (pf *ParsedForecast) String() string {
 		popstr = fmt.Sprintf(" %d%%", pf.POPPercent)
 	}
 
-	return statusFonts[strings.TrimSuffix(pf.SkyState, "n")] + popstr + tempstr
+	return statusFonts[strings.TrimSuffix(pf.SkyState, "n")] + " " + popstr + tempstr
 }

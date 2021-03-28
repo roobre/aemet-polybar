@@ -81,5 +81,5 @@ func main() {
 		}
 	}
 
-	os.Stdout.WriteString(strings.TrimSpace(out))
+	os.Stdout.WriteString(strings.TrimSuffix(out, *separator))
 }
