@@ -77,7 +77,7 @@ func main() {
 		}
 	} else {
 		for _, f := range forecast.NextHours(*hours) {
-			out += f.String() + "  "
+			out += f.String() + *separator
 		}
 	}
 
