@@ -48,7 +48,7 @@ Neither these defaults nor the output format are configurable at the moment. PRs
 ```ini
 [module/aemet]
 type = custom/script
-exec = aemet
+exec = aemet-polybar 2> /dev/null
 interval = 60
 ```
 
