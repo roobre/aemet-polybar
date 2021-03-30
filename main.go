@@ -9,7 +9,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -81,5 +80,5 @@ func main() {
 		}
 	}
 
-	os.Stdout.WriteString(strings.TrimSuffix(out, *separator))
+	fmt.Println(strings.TrimSuffix(out, *separator))
 }
