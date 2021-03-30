@@ -23,7 +23,7 @@ func main() {
 
 	resp, err := http.Get("https://www.aemet.es/xml/municipios_h/localidad_h_" + *city + ".xml")
 	if err != nil {
-		fmt.Println(" net") // https://fontawesome.com/icons/exclamation-triangle?style=solid
+		fmt.Println(" net?") // https://fontawesome.com/icons/exclamation-triangle?style=solid
 		log.Fatal(err)
 	}
 
@@ -40,7 +40,7 @@ func main() {
 	forecast := Location{}
 	err = dec.Decode(&forecast)
 	if err != nil {
-		fmt.Println(" fmt")
+		fmt.Println(" fmt?")
 		log.Fatal(err)
 	}
 
@@ -52,20 +52,24 @@ func main() {
 		for _, pair := range strings.Split(*labels, ",") {
 			labelHour := strings.Split(pair, ":")
 			if len(labelHour) != 2 {
+				log.Printf("cannot parse label '%s'", pair)
 				continue
 			}
 
 			hour, err := strconv.Atoi(labelHour[1])
 			if err != nil {
+				log.Printf("cannot parse hour from label '%s': %v", labelHour[1], err)
 				continue
 			}
 
 			if time.Now().Hour() > hour {
+				log.Printf("hour %d is in the past, skipping", hour)
 				continue
 			}
 
 			hourForecast := forecast.At(hour)
 			if hourForecast == nil {
+				log.Printf("got nil forecast for %dh, skipping", hour)
 				continue
 			}
 
