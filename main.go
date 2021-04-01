@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"roob.re/aemet-polybar/aemet"
 	"strconv"
 	"strings"
 	"time"
@@ -37,7 +38,7 @@ func main() {
 		}
 	}
 
-	forecast := Location{}
+	forecast := aemet.Location{}
 	err = dec.Decode(&forecast)
 	if err != nil {
 		fmt.Println(" fmt?")

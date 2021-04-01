@@ -1,4 +1,4 @@
-package main
+package aemet
 
 var statusFonts = map[string]string{
 	"11": "\uF185",
