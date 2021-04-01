@@ -192,5 +192,5 @@ func (pf *ParsedForecast) String() string {
 		popstr = fmt.Sprintf(" %d%%", pf.POPPercent)
 	}
 
-	return statusFonts[strings.TrimSuffix(pf.SkyState, "n")] + " " + popstr + tempstr
+	return strings.TrimSpace(statusFonts[strings.TrimSuffix(pf.SkyState, "n")] + " " + popstr + tempstr)
 }
