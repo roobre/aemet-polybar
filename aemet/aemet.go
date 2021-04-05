@@ -1,13 +1,55 @@
 package aemet
 
 import (
+	"encoding/xml"
+	"errors"
 	"fmt"
+	"golang.org/x/text/encoding/charmap"
+	"io"
+	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
 )
 
 const dateFormat = "2006-01-02"
+
+type Client struct {
+	HttpClient *http.Client
+}
+
+func (c *Client) City(cityCode string) (*Location, error) {
+	resp, err := http.Get("https://www.aemet.es/xml/municipios_h/localidad_h_" + url.QueryEscape(cityCode) + ".xml")
+	if err != nil {
+		return nil, err
+	}
+
+	dec := xml.NewDecoder(resp.Body)
+	dec.CharsetReader = func(charset string, input io.Reader) (reader io.Reader, e error) {
+		switch charset {
+		case "ISO-8859-15":
+			return charmap.ISO8859_15.NewDecoder().Reader(input), nil
+		default:
+			return nil, errors.New("charset is not ISO-8859-15")
+		}
+	}
+
+	loc := &Location{}
+	err = dec.Decode(&loc)
+	if err != nil {
+		return nil, err
+	}
+
+	loc.parse()
+	return loc, nil
+}
+
+var defaultClient Client = Client{HttpClient: http.DefaultClient}
+
+func City(cityCode string) (*Location, error) {
+	return defaultClient.City(cityCode)
+}
 
 type Location struct {
 	Name          string `xml:"nombre"`
@@ -16,6 +58,50 @@ type Location struct {
 
 	Forecasts      []DailyForecast `xml:"prediccion>dia" json:"-"`
 	DailyForecasts map[string]*DailyForecast
+}
+
+func (l *Location) NextHours(n int) []*ParsedForecast {
+	forecasts := make([]*ParsedForecast, 0, n)
+
+	for i := 1; i <= n; i++ {
+		hour := time.Now().Add(-15 * time.Minute).Truncate(time.Hour).Add(time.Duration(i) * time.Hour)
+		forecasts = append(forecasts, l.At(hour))
+	}
+
+	return forecasts
+}
+
+func (l *Location) At(t time.Time) *ParsedForecast {
+	day := t.Format(dateFormat)
+	f := l.DailyForecasts[day]
+
+	if f == nil {
+		return nil
+	}
+
+	hour := t.Hour()
+	return &ParsedForecast{
+		Location: l.Name,
+		DateStr:  f.DateStr,
+		Hour:     hour,
+
+		SkyState:        f.HourlySkyState[hour],
+		Precipitation:   f.HourlyPrecipitation[hour],
+		POPPercent:      f.HourlyPOP[hour],
+		Temperature:     f.HourlyTemperature[hour],
+		ThermalFeel:     f.HourlyThermalFeel[hour],
+		HumidityPercent: f.HourlyHumidity[hour],
+	}
+}
+
+func (l *Location) parse() {
+	l.DailyForecasts = map[string]*DailyForecast{}
+
+	for i := range l.Forecasts {
+		f := &l.Forecasts[i]
+		f.parse()
+		l.DailyForecasts[f.DateStr] = f
+	}
 }
 
 type DailyForecast struct {
@@ -59,65 +145,7 @@ type DailyForecast struct {
 	HourlyHumidity map[int]int
 }
 
-func (l *Location) NextHours(n int) []ParsedForecast {
-	forecasts := make([]ParsedForecast, 0, n)
-
-	for i := 1; i <= n; i++ {
-		day := time.Now().Truncate(24 * time.Hour).Format(dateFormat)
-		hour := time.Now().Add(-15 * time.Minute).Truncate(time.Hour).Add(time.Duration(i) * time.Hour)
-
-		f := l.DailyForecasts[day]
-		forecasts = append(forecasts, ParsedForecast{
-			//Elaborated:      l.ElaboratedStr,
-			Location: l.Name,
-			DateStr:  f.DateStr,
-			Hour:     hour.Hour(),
-
-			SkyState:        f.HourlySkyState[hour.Hour()],
-			Precipitation:   f.HourlyPrecipitation[hour.Hour()],
-			POPPercent:      f.HourlyPOP[hour.Hour()],
-			Temperature:     f.HourlyTemperature[hour.Hour()],
-			ThermalFeel:     f.HourlyThermalFeel[hour.Hour()],
-			HumidityPercent: f.HourlyHumidity[hour.Hour()],
-		})
-	}
-
-	return forecasts
-}
-
-func (l *Location) At(hour int) *ParsedForecast {
-	day := time.Now().Truncate(24 * time.Hour).Format(dateFormat)
-	f := l.DailyForecasts[day]
-
-	if f == nil {
-		return nil
-	}
-
-	return &ParsedForecast{
-		Location: l.Name,
-		DateStr:  f.DateStr,
-		Hour:     hour,
-
-		SkyState:        f.HourlySkyState[hour],
-		Precipitation:   f.HourlyPrecipitation[hour],
-		POPPercent:      f.HourlyPOP[hour],
-		Temperature:     f.HourlyTemperature[hour],
-		ThermalFeel:     f.HourlyThermalFeel[hour],
-		HumidityPercent: f.HourlyHumidity[hour],
-	}
-}
-
-func (l *Location) Parse() {
-	l.DailyForecasts = map[string]*DailyForecast{}
-
-	for i := range l.Forecasts {
-		f := &l.Forecasts[i]
-		f.Parse()
-		l.DailyForecasts[f.DateStr] = f
-	}
-}
-
-func (f *DailyForecast) Parse() {
+func (f *DailyForecast) parse() {
 	f.HourlySkyState = make(map[int]string, len(f.SkyStates))
 	for _, ss := range f.SkyStates {
 		f.HourlySkyState[ss.Hour] = ss.State

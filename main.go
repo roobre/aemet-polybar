@@ -1,14 +1,9 @@
 package main
 
 import (
-	"encoding/xml"
-	"errors"
 	"flag"
 	"fmt"
-	"golang.org/x/text/encoding/charmap"
-	"io"
 	"log"
-	"net/http"
 	"roob.re/aemet-polybar/aemet"
 	"strconv"
 	"strings"
@@ -22,34 +17,15 @@ func main() {
 	separator := flag.String("separator", "  ", "Separate entries with this string")
 	flag.Parse()
 
-	resp, err := http.Get("https://www.aemet.es/xml/municipios_h/localidad_h_" + *city + ".xml")
+	forecast, err := aemet.City(*city)
 	if err != nil {
-		fmt.Println(" net?") // https://fontawesome.com/icons/exclamation-triangle?style=solid
 		log.Fatal(err)
 	}
-
-	dec := xml.NewDecoder(resp.Body)
-	dec.CharsetReader = func(charset string, input io.Reader) (reader io.Reader, e error) {
-		switch charset {
-		case "ISO-8859-15":
-			return charmap.ISO8859_15.NewDecoder().Reader(input), nil
-		default:
-			return nil, errors.New("charset is not ISO-8859-15")
-		}
-	}
-
-	forecast := aemet.Location{}
-	err = dec.Decode(&forecast)
-	if err != nil {
-		fmt.Println(" fmt?")
-		log.Fatal(err)
-	}
-
-	forecast.Parse()
 
 	out := ""
 
 	if *labels != "" {
+		t := time.Now()
 		for _, pair := range strings.Split(*labels, ",") {
 			labelHour := strings.Split(pair, ":")
 			if len(labelHour) != 2 {
@@ -63,12 +39,14 @@ func main() {
 				continue
 			}
 
-			if time.Now().Hour() > hour {
+			if t.Hour() > hour {
 				log.Printf("hour %d is in the past, skipping", hour)
 				continue
 			}
 
-			hourForecast := forecast.At(hour)
+			hourForecast := forecast.At(time.Date(
+				t.Year(), t.Month(), t.Day(), hour, 0, 0, 0, t.Location(),
+			))
 			if hourForecast == nil {
 				log.Printf("got nil forecast for %dh, skipping", hour)
 				continue
