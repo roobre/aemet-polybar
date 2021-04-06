@@ -170,8 +170,10 @@ func (f *DailyForecast) parse() {
 			continue
 		}
 
-		for i := begin; i <= end; i++ {
-			f.HourlyPOP[i] = pop.POPPercent
+		hour := begin % 24
+		for hour != end {
+			f.HourlyPOP[hour] = pop.POPPercent
+			hour = (hour + 1) % 24
 		}
 	}
 
