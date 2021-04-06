@@ -112,51 +112,48 @@ type DailyForecast struct {
 		Description string `xml:"descripcion,attr"`
 		State       string `xml:",chardata"`
 	} `xml:"estado_cielo" json:"-"`
-	HourlySkyState map[int]string
+	HourlySkyState [24]string
 
 	Precipitations []struct {
 		Hour   int     `xml:"periodo,attr"`
 		Amount float32 `xml:",chardata"`
 	} `xml:"precipitations" json:"-"`
-	HourlyPrecipitation map[int]float32
+	HourlyPrecipitation [24]float32
 
 	POPs []struct {
 		Period     string `xml:"periodo,attr"`
 		POPPercent int    `xml:",chardata"`
 	} `xml:"prob_precipitacion" json:"-"`
-	HourlyPOP map[int]int
+	HourlyPOP [24]int
 
 	Temperatures []struct {
 		Hour        int `xml:"periodo,attr"`
 		Temperature int `xml:",chardata"`
 	} `xml:"temperatura" json:"-"`
-	HourlyTemperature map[int]int
+	HourlyTemperature [24]int
 
 	ThermalFeels []struct {
 		Hour        int `xml:"periodo,attr"`
 		ThermalFeel int `xml:",chardata"`
 	} `xml:"sens_termica" json:"-"`
-	HourlyThermalFeel map[int]int
+	HourlyThermalFeel [24]int
 
 	Humidities []struct {
 		Hour            int `xml:"periodo,attr"`
 		HumidityPercent int `xml:",chardata"`
 	} `xml:"humedad_relativa" json:"-"`
-	HourlyHumidity map[int]int
+	HourlyHumidity [24]int
 }
 
 func (f *DailyForecast) parse() {
-	f.HourlySkyState = make(map[int]string, len(f.SkyStates))
 	for _, ss := range f.SkyStates {
 		f.HourlySkyState[ss.Hour] = ss.State
 	}
 
-	f.HourlyPrecipitation = make(map[int]float32, len(f.Precipitations))
 	for _, p := range f.Precipitations {
 		f.HourlyPrecipitation[p.Hour] = p.Amount
 	}
 
-	f.HourlyPOP = make(map[int]int, len(f.POPs))
 	for _, pop := range f.POPs {
 		if len(pop.Period) != 4 {
 			continue
@@ -177,17 +174,14 @@ func (f *DailyForecast) parse() {
 		}
 	}
 
-	f.HourlyTemperature = make(map[int]int, len(f.Temperatures))
 	for _, t := range f.Temperatures {
 		f.HourlyTemperature[t.Hour] = t.Temperature
 	}
 
-	f.HourlyThermalFeel = make(map[int]int, len(f.ThermalFeels))
 	for _, tf := range f.ThermalFeels {
 		f.HourlyThermalFeel[tf.Hour] = tf.ThermalFeel
 	}
 
-	f.HourlyHumidity = make(map[int]int, len(f.Humidities))
 	for _, h := range f.Humidities {
 		f.HourlyHumidity[h.Hour] = h.HumidityPercent
 	}
