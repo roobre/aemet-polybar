@@ -4,13 +4,14 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"golang.org/x/text/encoding/charmap"
 	"io"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
+
+	"golang.org/x/text/encoding/charmap"
 )
 
 const dateFormat = "2006-01-02"
@@ -212,8 +213,8 @@ func (pf *ParsedForecast) String() string {
 	}
 
 	popstr := ""
-	if pf.POPPercent > 10 {
-		popstr = fmt.Sprintf(" %d%%", pf.POPPercent)
+	if pf.Precipitation > 0.1 {
+		popstr = fmt.Sprintf(" %.1fmm", pf.Precipitation)
 	}
 
 	return statusFonts[strings.TrimSuffix(pf.SkyState, "n")] + popstr + tempstr
