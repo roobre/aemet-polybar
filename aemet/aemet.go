@@ -217,5 +217,5 @@ func (pf *ParsedForecast) String() string {
 		popstr = fmt.Sprintf(" %.1fmm", pf.Precipitation)
 	}
 
-	return statusFonts[strings.TrimSuffix(pf.SkyState, "n")] + popstr + tempstr
+	return statusIcon(pf.SkyState) + popstr + tempstr
 }
