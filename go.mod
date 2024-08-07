@@ -2,4 +2,4 @@ module roob.re/aemet-polybar
 
 go 1.16
 
-require golang.org/x/text v0.16.0
+require golang.org/x/text v0.17.0
